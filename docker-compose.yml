@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  docx-checker:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+    environment:
+      - FLASK_ENV=production
