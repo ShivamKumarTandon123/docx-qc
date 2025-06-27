@@ -1,33 +1,48 @@
 #!/usr/bin/env python3
 """
-Error handlers for the application
+Error handlers for the application - converted to FastAPI
 """
 
 import logging
-from flask import jsonify
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger(__name__)
 
-def register_error_handlers(app):
-    """Register error handlers with the Flask app"""
-    
-    @app.errorhandler(404)
-    def not_found(error):
-        """Handle 404 errors."""
-        return jsonify({'error': 'Not found'}), 404
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail}
+    )
 
-    @app.errorhandler(500)
-    def internal_error(error):
-        """Handle 500 errors."""
-        logger.error(f"Internal server error: {str(error)}")
-        return jsonify({'error': 'Internal server error'}), 500
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors."""
+    return JSONResponse(
+        status_code=422,
+        content={"error": "Validation error", "details": exc.errors()}
+    )
 
-    @app.errorhandler(413)
-    def too_large(error):
-        """Handle file too large errors."""
-        return jsonify({'error': 'File too large. Maximum size is 16MB.'}), 413
+async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle Starlette HTTP exceptions."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail}
+    )
 
-    @app.errorhandler(400)
-    def bad_request(error):
-        """Handle bad request errors."""
-        return jsonify({'error': 'Bad request'}), 400 
+async def general_exception_handler(request: Request, exc: Exception):
+    """Handle general exceptions."""
+    logger.error(f"Unhandled exception: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error"}
+    )
+
+def register_exception_handlers(app):
+    """Register exception handlers with the FastAPI app"""
+    app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(StarletteHTTPException, starlette_http_exception_handler)
+    app.add_exception_handler(Exception, general_exception_handler) 

@@ -13,9 +13,9 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     ALLOWED_EXTENSIONS = {'docx'}
     
-    # Flask configuration
-    FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
-    DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    # FastAPI configuration
+    APP_ENV = os.environ.get('APP_ENV', 'development')
+    DEBUG = os.environ.get('APP_DEBUG', 'False').lower() == 'true'
     
     # File upload settings
     UPLOAD_TIMEOUT = timedelta(minutes=5)
@@ -85,12 +85,12 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    FLASK_ENV = 'development'
+    APP_ENV = 'development'
 
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    FLASK_ENV = 'production'
+    APP_ENV = 'production'
     
     # Production-specific settings
     SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -101,7 +101,6 @@ class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
     DEBUG = True
-    WTF_CSRF_ENABLED = False
     
     # Testing-specific settings
     EXTERNAL_LINK_TIMEOUT = 5  # Faster timeout for tests

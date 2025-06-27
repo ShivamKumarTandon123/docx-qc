@@ -3,14 +3,9 @@
 WSGI entry point for production deployment
 """
 
-import os
-from app import create_app
-from app.config import config
+from app.main import app
 
-# Get environment configuration
-env = os.environ.get('FLASK_ENV', 'development')
-app = create_app(config[env])
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port) 
+# For WSGI servers like Gunicorn
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000) 
